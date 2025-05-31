@@ -8,23 +8,32 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.8'
+
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential libssl-dev libffi-dev python3-dev python3-pip openjdk-17-jdk unzip zip
+          sudo apt install -y build-essential libssl-dev libffi-dev python3-dev python3-pip openjdk-17-jdk unzip zip git
           pip install --upgrade pip
           pip install buildozer cython
-      - name: Initialize Buildozer
-        run: buildozer init
+
+      - name: Initialize Buildozer (only if needed)
+        run: |
+          if [ ! -f buildozer.spec ]; then
+            buildozer init
+          fi
+
       - name: Build APK
         run: buildozer -v android debug
-      - name: Upload APK
+
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
-          name: app
+          name: kivy-apk
           path: bin/*.apk
